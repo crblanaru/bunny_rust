@@ -1,2 +1,2 @@
-# bunny_remote
-VSCode remote development on Bunnyshell
+# bunny_rust
+Rust app for Bunnyshell demo
