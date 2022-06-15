@@ -1,38 +1,31 @@
 # Rust as the base image
-FROM rust:1.51
+FROM rust:1.49 as build
 
-# 1. Create a new empty shell project
-RUN addgroup \
-    --gid 1000 \
-    docker
-
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "$(pwd)" \
-    --ingroup docker \
-    --no-create-home \
-    --uid 1000 \
-    docker
-
+# Create a new empty shell project
 RUN USER=root cargo new --bin holodeck
 WORKDIR /holodeck
 
-# 2. Copy our manifests
-#COPY ./Cargo.lock ./Cargo.lock
+# Copy our manifests
+COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
 
-# 3. Build only the dependencies to cache them
+# Build only the dependencies to cache them
 RUN cargo build --release
 RUN rm src/*.rs
 
-# 4. Now that the dependency is built, copy your source code
+# Copy the source code
 COPY ./src ./src
 
-# 5. Build for release.
+# Build for release.
 RUN rm ./target/release/deps/holodeck*
-RUN cargo install --path .
+RUN cargo build --release
 
-RUN chown -R 1000:0 /holodeck
+# The final base image
+FROM debian:buster-slim
 
-CMD ["holodeck"]
+# Copy from the previous build
+COPY --from=build /holodeck/target/release/holodeck /usr/src/holodeck
+# COPY --from=build /holodeck/target/release/holodeck/target/x86_64-unknown-linux-musl/release/holodeck .
+
+# Run the binary
+CMD ["/usr/src/holodeck"]
