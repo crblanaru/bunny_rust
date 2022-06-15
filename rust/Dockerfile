@@ -6,7 +6,6 @@ RUN USER=root cargo new --bin holodeck
 WORKDIR /holodeck
 
 # Copy our manifests
-COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
 
 # Build only the dependencies to cache them
