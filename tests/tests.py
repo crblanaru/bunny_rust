@@ -2,7 +2,6 @@ import requests
 import json
 import sys
 
-
 def get_addresses():
 
     with open('environment_components.json', 'r') as f:
